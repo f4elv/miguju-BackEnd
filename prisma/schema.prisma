@@ -1,0 +1,31 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Amigurumi {
+    id Int @id @default(autoincrement())
+    name String
+    description String?
+    category Category[] @relation("amigurumiCategory")
+    fotos Foto[]
+    createdAt DateTime @default(now())
+    updateAt DateTime @updatedAt
+}
+
+model Category {
+    id Int @id @default(autoincrement())
+    name String @unique
+    amigurumi Amigurumi[] @relation("amigurumiCategory")
+}
+
+model Foto {
+    id Int @id @default(autoincrement())
+    url String
+    amigurumiId Int
+    amigurumi Amigurumi @relation(fields: [amigurumiId], references: [id])
+}
