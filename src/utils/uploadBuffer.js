@@ -7,7 +7,7 @@ function uploadFromBuffer(filebuffer) {
 		const stream = cloudinary.uploader.upload_stream({
             folder: "amigurumis",
             width: 800,
-            height: 800, 
+            height: 800,
             crop: "fill" 
         },
         (erro, result) => {
