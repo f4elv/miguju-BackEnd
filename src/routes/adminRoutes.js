@@ -10,15 +10,15 @@ const adminRouter = express.Router();
 adminRouter.post("/login", login);
 
 // Rotas Amigurumis
-adminRouter.post("/amigurumi", autenticateToken, upload.array("fotos", 5), createAmigurumi);
-adminRouter.put("/amigurumi/:id", autenticateToken, upload.array("fotos", 5), updateAmigurumi);
+adminRouter.post("/amigurumis", autenticateToken, upload.array("fotos", 5), createAmigurumi);
+adminRouter.put("/amigurumis/:id", autenticateToken, upload.array("fotos", 5), updateAmigurumi);
 adminRouter.get("/amigurumis", autenticateToken, listAmigurumis);
-adminRouter.get("/amigurumi/:id", autenticateToken, getAmigurumi);
-adminRouter.delete("/amigurumi/:id", autenticateToken, deleteAmigurumi);
+adminRouter.get("/amigurumis/:id", autenticateToken, getAmigurumi);
+adminRouter.delete("/amigurumis/:id", autenticateToken, deleteAmigurumi);
 
 // Rotas Categorias
-adminRouter.post("/categoria", autenticateToken, createCategory);
-adminRouter.delete("/categoria/:id", autenticateToken, deleteCategory);
-adminRouter.get("/categorias", autenticateToken, listCategories);
+adminRouter.post("/categories", autenticateToken, createCategory);
+adminRouter.delete("/categories/:id", autenticateToken, deleteCategory);
+adminRouter.get("/categories", autenticateToken, listCategories);
 
 export default adminRouter;

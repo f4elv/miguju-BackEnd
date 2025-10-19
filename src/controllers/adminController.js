@@ -125,11 +125,36 @@ export async function deleteAmigurumi(req, res) {
 		const { id } = req.params;
 		if (!id) return res.status(400).json({ erro: "Amigurumi não selecionado" });
 
-		await prisma.foto.deleteMany({ where: { amigurumiId: Number(id) } });
-		await prisma.amigurumi.delete({ where: { id: Number(id) } });
-		res.status(204).json({ mensagem: "Amigurumi deletado com sucesso" });
+		console.log("🗑️ Iniciando delete do amigurumi ID:", id);
+
+		// Usar transação para garantir que tudo seja feito ou nada
+		await prisma.$transaction(async (tx) => {
+			// 1. Desconectar categorias
+			await tx.amigurumi.update({
+				where: { id: Number(id) },
+				data: { category: { set: [] } },
+			});
+
+			// 2. Deletar fotos
+			await tx.foto.deleteMany({
+				where: { amigurumiId: Number(id) },
+			});
+
+			// 3. Deletar amigurumi
+			await tx.amigurumi.delete({
+				where: { id: Number(id) },
+			});
+		});
+
+		console.log("✅ Amigurumi deletado com sucesso");
+		res.status(200).json({ mensagem: "Amigurumi deletado com sucesso" });
 	} catch (erro) {
-		console.error(erro);
+		console.error("❌ ERRO:", erro.message);
+
+		if (erro.code === "P2025") {
+			return res.status(404).json({ erro: "Amigurumi não encontrado" });
+		}
+
 		res.status(500).json({ erro: "Erro ao deletar amigurumi" });
 	}
 }
@@ -210,7 +235,7 @@ export async function deleteCategory(req, res) {
 
 		await prisma.category.delete({ where: { id } });
 
-		res.status(204).json({ message: "Categoria deletada com sucesso", category });
+		res.status(200).json({ message: "Categoria deletada com sucesso", category });
 	} catch (erro) {
 		console.error(erro);
 		res.status(500).json({ erro: "Erro ao deletar categoria" });
