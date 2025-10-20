@@ -106,7 +106,6 @@ export async function updateAmigurumi(req, res) {
 
 		if (Object.keys(fotosUpdate).length > 0) dataUpdate.fotos = fotosUpdate;
 
-		// update
 		amigurumi = await prisma.amigurumi.update({
 			where: { id: Number(id) },
 			data: dataUpdate,
@@ -126,31 +125,20 @@ export async function deleteAmigurumi(req, res) {
 		if (!id) return res.status(400).json({ erro: "Amigurumi não selecionado" });
 
 		console.log("🗑️ Iniciando delete do amigurumi ID:", id);
-
-		// Usar transação para garantir que tudo seja feito ou nada
 		await prisma.$transaction(async (tx) => {
-			// 1. Desconectar categorias
 			await tx.amigurumi.update({
 				where: { id: Number(id) },
 				data: { category: { set: [] } },
 			});
-
-			// 2. Deletar fotos
 			await tx.foto.deleteMany({
 				where: { amigurumiId: Number(id) },
 			});
-
-			// 3. Deletar amigurumi
 			await tx.amigurumi.delete({
 				where: { id: Number(id) },
 			});
 		});
-
-		console.log("✅ Amigurumi deletado com sucesso");
 		res.status(200).json({ mensagem: "Amigurumi deletado com sucesso" });
 	} catch (erro) {
-		console.error("❌ ERRO:", erro.message);
-
 		if (erro.code === "P2025") {
 			return res.status(404).json({ erro: "Amigurumi não encontrado" });
 		}
