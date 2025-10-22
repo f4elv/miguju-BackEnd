@@ -49,7 +49,10 @@ export async function createAmigurumi(req, res) {
 				description,
 				fotos: { create: fotos },
 				category: {
-					connectOrCreate: mapCategoriesForPrisma(category),
+					connectOrCreate: category.map((cat) => ({
+						where: { name: cat },
+						create: { name: cat },
+					})),
 				},
 			},
 			include: { fotos: true, category: true },
@@ -79,10 +82,19 @@ export async function updateAmigurumi(req, res) {
 		if (description !== undefined) dataUpdate.description = description;
 
 		const categoryUpdate = {};
-		const addCats = normalizeCategories(parseJSONSafe(addCategory));
-		const removeCats = parseJSONSafe(removeCategory);
 
-		if (addCats.length > 0) categoryUpdate.connectOrCreate = mapCategoriesForPrisma(addCats);
+		if (addCats.length > 0) {
+			categoryUpdate.connectOrCreate = addCats.map((cat) => ({
+				where: { name: cat },
+				create: { name: cat },
+			}));
+		}
+
+		if (removeCats.length > 0) {
+			categoryUpdate.disconnect = removeCats.map((id) => ({ id: Number(id) }));
+		}
+
+		if (Object.keys(categoryUpdate).length > 0) dataUpdate.category = categoryUpdate;
 		if (removeCats.length > 0) categoryUpdate.disconnect = mapCategoryIds(removeCats);
 
 		if (Object.keys(categoryUpdate).length > 0) dataUpdate.category = categoryUpdate;
